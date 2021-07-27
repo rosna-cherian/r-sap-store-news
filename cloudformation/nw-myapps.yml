@@ -1,0 +1,58 @@
+Resources:
+  DDBGTODJA:
+    Type: 'AWS::DynamoDB::GlobalTable'
+    Properties: 
+        AttributeDefinitions: 
+            -   AttributeName: 'newsId'
+                AttributeType: 'S'
+            -   AttributeName: 'searchOn'
+                AttributeType: 'S'
+        KeySchema: 
+            -   AttributeName: 'newsId'
+                KeyType: 'HASH'
+            -   AttributeName: 'searchOn'
+                KeyType: 'RANGE'
+        Replicas: 
+            -   Region: 'us-east-1'
+                ReadProvisionedThroughputSettings:
+                    ReadCapacityUnits: 5
+            -   Region: 'eu-west-1'
+                ReadProvisionedThroughputSettings:
+                    ReadCapacityUnits: 5
+        StreamSpecification:
+            StreamViewType: KEYS_ONLY
+        TableName: 'POC_GUARDIAN_NW'
+        WriteProvisionedThroughputSettings:
+            WriteCapacityAutoScalingSettings:        
+                MaxCapacity: 10
+                MinCapacity: 5
+                TargetTrackingScalingPolicyConfiguration: 
+                    TargetValue: 70
+  DKJULFJHT:
+    Type: AWS::Lambda::Function
+    Properties: 
+        Code: 
+            S3Bucket: rosna-sap-ass-dp-packages
+            S3Key: store-db.zip
+        Description: to store news articles to DDB
+        FunctionName: sap-store-news
+        Handler: index.handler
+        MemorySize: 512
+        PackageType: Zip
+        Role: arn:aws:iam::483609043719:role/sap-execution-role
+        Runtime: nodejs12.x
+        Timeout: 50
+  DKJULFJHT1:
+    Type: AWS::Lambda::Function
+    Properties: 
+        Code: 
+            S3Bucket: rosna-sap-ass-dp-packages
+            S3Key: get-news.zip
+        Description: to retreive articles from DDB
+        FunctionName: sap-retreive-news
+        Handler: index.handler
+        MemorySize: 512
+        PackageType: Zip
+        Role: arn:aws:iam::483609043719:role/sap-execution-role
+        Runtime: nodejs12.x
+        Timeout: 50
